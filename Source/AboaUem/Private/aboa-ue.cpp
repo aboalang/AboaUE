@@ -1014,6 +1014,27 @@ ue_primitive_component_set_material(
   return s7_t(s7);
 }
 
+static auto const name_ue_primitive_component_set_simulate_physics
+                    = "ue-primitive-component-set-simulate-physics";
+static auto            ue_primitive_component_set_simulate_physics(
+  s7_scheme * s7, s7_pointer args
+) -> s7_pointer {
+  auto const argcomp = scheme_arg_typed_or_error<UPrimitiveComponent>(
+    s7, s7_car(args), 1, "component");
+  if (argcomp.index() == 1)
+    return std::get<1>(argcomp).pointer;
+  auto const component = std::get<0>(argcomp);
+  if (!component)
+    return s7_f(s7); // !!! scheme_arg_typed_or_error already checks for null
+  auto const argsim = scheme_arg_boolean_or_error(
+    s7, s7_cadr(args), 2, "simulate");
+  if (argsim.index() == 1)
+    return std::get<1>(argsim).pointer;
+  const_cast<UPrimitiveComponent*>(component)->SetSimulatePhysics(
+    std::get<0>(argsim));
+  return s7_t(s7);
+}
+
 static auto const name_ue_print_string = "ue-print-string";
 static auto
 ue_print_string(s7_scheme * s7, s7_pointer args) -> s7_pointer {
@@ -1345,6 +1366,12 @@ auto bootAboaUe() -> AboaUeMutant {
     3, 0, false, function_help_string(
     name_ue_primitive_component_set_material,
       " component index material").c_str());
+  s7_define_function(s7session,
+    name_ue_primitive_component_set_simulate_physics,
+         ue_primitive_component_set_simulate_physics,
+    2, 0, false, function_help_string(
+    name_ue_primitive_component_set_simulate_physics,
+      " component simulate").c_str());
   s7_define_function(s7session,
     name_ue_print_string, ue_print_string, 2, 0, false,
     function_help_string(name_ue_print_string, " world string)").c_str());
