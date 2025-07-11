@@ -20,6 +20,8 @@
 #include "Components/PrimitiveComponent.h"
 #include "Components/SceneComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Engine/SkeletalMeshSocket.h"
 #include "Engine/World.h"
 #include "GameFramework/Actor.h"
 #include "GameFramework/Character.h"
@@ -355,6 +357,7 @@ static auto            ue_actor_attach_to_actor(
   auto const rules = attachrules[std::get<0>(argrules)];
   FName socket = NAME_None;
   if (s7_list_length(s7, args) > 3) {
+    // !!! NOTE: UE 5.2.1 C++ code will ignore any socket name provided
     auto const argsock = scheme_arg_string_or_error(
       s7, s7_cadddr(args), 4, "socket");
     if (argsock.index() == 1)
@@ -363,6 +366,43 @@ static auto            ue_actor_attach_to_actor(
   }
   return const_cast<AActor*>(actor)->AttachToActor(
     const_cast<AActor*>(parent), rules, socket
+  ) ? s7_t(s7) : s7_f(s7);
+}
+
+// !!! special API becaush ue-actor-attach-to-actor ignores socket name
+static auto const name_ue_actor_attach_to_skeletal_mesh_component_socket
+                    = "ue-actor-attach-to-skeletal-mesh-component-socket";
+static auto            ue_actor_attach_to_skeletal_mesh_component_socket(
+  s7_scheme * s7, s7_pointer args
+) -> s7_pointer {
+  auto const argactor = scheme_arg_typed_or_error<AActor>(
+    s7, s7_car(args), 1, "actor");
+  if (argactor.index() == 1)
+    return std::get<1>(argactor).pointer;
+  auto const actor = std::get<0>(argactor);
+  if (!actor)
+    return s7_f(s7); // !!! scheme_arg_typed_or_error already checks for null
+  auto const argskcomp = scheme_arg_typed_or_error<USkeletalMeshComponent>(
+    s7, s7_cadr(args), 2, "component");
+  if (argskcomp.index() == 1)
+    return std::get<1>(argskcomp).pointer;
+  auto const skcomp = std::get<0>(argskcomp);
+  if (!skcomp)
+    return s7_f(s7); // !!! scheme_arg_typed_or_error already checks for null
+  auto const skmesh = skcomp->GetSkeletalMeshAsset();
+  if (!skmesh)
+    return s7_f(s7);
+  auto const argsock = scheme_arg_string_or_error(
+    s7, s7_caddr(args), 3, "socket");
+  if (argsock.index() == 1)
+      return std::get<1>(argsock).pointer;
+  auto const socket = FName(*FString(ANSI_TO_TCHAR(std::get<0>(argsock))));
+  auto const sksock = skmesh->FindSocket(socket);
+  if (!sksock)
+    return s7_f(s7);
+  return const_cast<USkeletalMeshSocket*>(sksock)->AttachActor(
+    const_cast<AActor*>(actor),
+    const_cast<USkeletalMeshComponent*>(skcomp)
   ) ? s7_t(s7) : s7_f(s7);
 }
 
@@ -1231,6 +1271,12 @@ auto bootAboaUe() -> AboaUeMutant {
     3, 1, false, function_help_string(
     name_ue_actor_attach_to_actor,
       " actor parent rules socket").c_str());
+  s7_define_function(s7session,
+    name_ue_actor_attach_to_skeletal_mesh_component_socket,
+         ue_actor_attach_to_skeletal_mesh_component_socket,
+    3, 0, false, function_help_string(
+    name_ue_actor_attach_to_skeletal_mesh_component_socket,
+      " actor component rules socket").c_str());
   s7_define_function(s7session,
     name_ue_actor_detach_from_actor,
          ue_actor_detach_from_actor,
