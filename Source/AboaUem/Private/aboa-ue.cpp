@@ -329,9 +329,11 @@ static std::array attachrules {
   FAttachmentTransformRules::SnapToTargetIncludingScale
 };
 
-static auto const name_ue_actor_attach_to_actor = "ue-actor-attach-to-actor";
-static auto
-ue_actor_attach_to_actor(s7_scheme * s7, s7_pointer args) -> s7_pointer {
+static auto const name_ue_actor_attach_to_actor
+                    = "ue-actor-attach-to-actor";
+static auto            ue_actor_attach_to_actor(
+  s7_scheme * s7, s7_pointer args
+) -> s7_pointer {
   auto const argactor = scheme_arg_typed_or_error<AActor>(
     s7, s7_car(args), 1, "actor");
   if (argactor.index() == 1)
@@ -351,13 +353,14 @@ ue_actor_attach_to_actor(s7_scheme * s7, s7_pointer args) -> s7_pointer {
   if (argrules.index() == 1)
     return std::get<1>(argrules).pointer;
   auto const rules = attachrules[std::get<0>(argrules)];
-  // TODO: ### OPTIONAL ARG COUNT NOT WORKING
-  //auto const argsocket = scheme_arg_string_or_error(
-  //  s7, s7_cadddr(args), 4, "socket");
-  //auto const socket = argsocket.index() == 1
-  //  ? NAME_None : FName(*FString(ANSI_TO_TCHAR(std::get<0>(argsocket))));
-    // ^ TODO: ### ignoring error, assume default instead
-  auto const socket = NAME_None;
+  FName socket = NAME_None;
+  if (s7_list_length(s7, args) > 3) {
+    auto const argsock = scheme_arg_string_or_error(
+      s7, s7_cadddr(args), 4, "socket");
+    if (argsock.index() == 1)
+        return std::get<1>(argsock).pointer;
+    socket = FName(*FString(ANSI_TO_TCHAR(std::get<0>(argsock))));
+  }
   return const_cast<AActor*>(actor)->AttachToActor(
     const_cast<AActor*>(parent), rules, socket
   ) ? s7_t(s7) : s7_f(s7);
@@ -1225,9 +1228,7 @@ auto bootAboaUe() -> AboaUeMutant {
   s7_define_function(s7session,
     name_ue_actor_attach_to_actor,
          ue_actor_attach_to_actor,
-    // TODO: ### OPTIONAL ARG COUNT NOT CALLING C++ FUNCTION
-    //3, 1, false, function_help_string(
-    3, 0, false, function_help_string(
+    3, 1, false, function_help_string(
     name_ue_actor_attach_to_actor,
       " actor parent rules socket").c_str());
   s7_define_function(s7session,
