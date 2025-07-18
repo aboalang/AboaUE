@@ -28,6 +28,7 @@
 #include "HAL/PlatformFileManager.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Materials/MaterialInstanceDynamic.h"
+#include "Math/Rotator.h"
 #include "Misc/FileHelper.h"
 
 #include <array>
@@ -1192,6 +1193,27 @@ static auto            umg_user_widget_get_root_widget(
     : s7_f(s7); // !!! scheme_arg_typed_or_error already checks for null
 }
 
+static auto const name_ue_vector_rotate_euler
+                    = "ue-vector-rotate-euler";
+static auto            ue_vector_rotate_euler(
+  s7_scheme * s7, s7_pointer args
+) -> s7_pointer {
+  auto const argvec = scheme_arg_float_vector_or_error(
+    s7, s7_car(args), 1, "vector");
+  if (argvec.index() == 1)
+    return std::get<1>(argvec).pointer;
+  auto const vector = std::get<0>(argvec).pointer;
+  auto const argang = scheme_arg_float_vector_or_error(
+    s7, s7_cadr(args), 2, "angles");
+  if (argang.index() == 1)
+    return std::get<1>(argang).pointer;
+  auto const angles = std::get<0>(argang).pointer;
+  return scheme_ue_vector(s7,
+    FRotator3d::MakeFromEuler(
+      ue_vector_from_s7(angles)).RotateVector(
+      ue_vector_from_s7(vector)));
+}
+
 static auto const name_ue_world_current_destroy_actor
                     = "ue-world-current-destroy-actor";
 static auto
@@ -1449,6 +1471,12 @@ auto bootAboaUe() -> AboaUeMutant {
     1, 0, false, function_help_string(
     name_ue_uobject_get_display_name,
       " uobject").c_str());
+  s7_define_function(s7session,
+    name_ue_vector_rotate_euler,
+         ue_vector_rotate_euler,
+    2, 0, false, function_help_string(
+    name_ue_vector_rotate_euler,
+      " vector angles").c_str());
   s7_define_function(s7session,
     name_ue_world_current_destroy_actor,
          ue_world_current_destroy_actor,
