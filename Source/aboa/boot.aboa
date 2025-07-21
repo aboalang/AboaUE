@@ -31,13 +31,22 @@
           ((car procs) args)
           (call-procs-rec (cdr procs) args))))
 
-  (= (aboaht key val) # TODO: localize
-   (@ ((ht (make-hash-table 8 eq?))) # TODO: YUCK, NEED A COMBINATOR
-      (=> (ht key) val)
+  (= (aboaht . keyvalpairs) # TODO: localize
+    ##(tr-boot-form-vals "(aboaht ~A)" keyvalpairs)
+    (@ ((ht (make-hash-table 8 eq?))) # TODO: YUCK, NEED A COMBINATOR
+      (map (^ (kvp) (=> (ht (car kvp)) (cdr kvp))) keyvalpairs)
+      ##(tr-boot-form-vals ".aboaht ~A" ht)
       ht))
 
-  (=  aboaue-registry (aboaht 'pubsub (aboaht 'events (aboaht 'shutdown '()))))
+  (= (aboaobjsym obj) (string->symbol (object->string obj)))
+
+  (=  aboaue-registry (aboaht
+        (cons 'objenv (aboaht))
+        (cons 'pubsub (aboaht
+          (cons 'events (aboaht
+            (cons 'shutdown '())))))))
   (= (aboaue-registry-ref)                 aboaue-registry)
+  (= (aboaue-registry-objenv-ref)        ((aboaue-registry-ref)        'objenv))
   (= (aboaue-registry-pubsub-ref)        ((aboaue-registry-ref)        'pubsub))
   (= (aboaue-registry-pubsub-events-ref) ((aboaue-registry-pubsub-ref) 'events))
   (= (aboaue-registry-publish-event channel args)
