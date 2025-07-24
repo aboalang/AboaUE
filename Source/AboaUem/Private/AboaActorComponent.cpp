@@ -38,7 +38,7 @@ void UAboaActorComponent::InitializeComponent() {
   Super::InitializeComponent();
   auto results = runCachedAboaUeCodeAtPath(
     pluginSourcePath(AboaDirPlugin, AboaDirSource, AboaFilename),
-    AboaNamespace + "-init",
+    AboaNamespace + "-augment-init",
     makeAboaUeDataDict({
       {"uobject", makeAboaUeDataUobjectRef(*this)}}),
     true); // forceReload TODO: ### UNTIL AUTO-RELOAD IS IMPLEMENTED
@@ -52,7 +52,7 @@ void UAboaActorComponent::InitializeComponent() {
 void UAboaActorComponent::BeginPlay() {
   Super::BeginPlay();
   auto results = callLoadedAboaUeCode(
-    AboaNamespace + "-begin-play",
+    AboaNamespace + "-augment-begin-play",
     makeAboaUeDataDict({
       {"uobject", makeAboaUeDataUobjectRef(*this)}}));
 }
@@ -63,16 +63,7 @@ void UAboaActorComponent::EndPlay(
 ) {
   Super::EndPlay(EndPlayReason);
   auto results = callLoadedAboaUeCode(
-    AboaNamespace + "-end-play",
-    makeAboaUeDataDict({
-      {"uobject", makeAboaUeDataUobjectRef(*this)}}));
-}
-
-// virtual
-void UAboaActorComponent::UninitializeComponent() {
-  Super::UninitializeComponent();
-  auto results = callLoadedAboaUeCode(
-    AboaNamespace + "-uninit",
+    AboaNamespace + "-augment-end-play",
     makeAboaUeDataDict({
       {"uobject", makeAboaUeDataUobjectRef(*this)}}));
 }
@@ -85,8 +76,17 @@ void UAboaActorComponent::TickComponent(
 ) {
   Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
   auto results = callLoadedAboaUeCode(
-    AboaNamespace + "-tick",
+    AboaNamespace + "-augment-tick",
     makeAboaUeDataDict({
       {"uobject", makeAboaUeDataUobjectRef(*this)},
       {"delta",   makeAboaUeDataFloat(DeltaTime)}}));
+}
+
+// virtual
+void UAboaActorComponent::UninitializeComponent() {
+  Super::UninitializeComponent();
+  auto results = callLoadedAboaUeCode(
+    AboaNamespace + "-augment-uninit",
+    makeAboaUeDataDict({
+      {"uobject", makeAboaUeDataUobjectRef(*this)}}));
 }
