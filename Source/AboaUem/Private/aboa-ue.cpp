@@ -1078,6 +1078,26 @@ ue_primitive_component_set_material(
   return s7_t(s7);
 }
 
+static auto const name_ue_primitive_component_set_physics_angular_velocity_in_radians
+                    = "ue-primitive-component-set-physics-angular-velocity-in-radians";
+static auto            ue_primitive_component_set_physics_angular_velocity_in_radians(
+  s7_scheme * s7, s7_pointer args
+) -> s7_pointer {
+  auto const argcomp = scheme_arg_typed_or_error<UPrimitiveComponent>(
+    s7, s7_car(args), 1, "component");
+  if (argcomp.index() == 1) // !!! scheme_arg_typed_or_error already checks for null
+    return std::get<1>(argcomp).pointer;
+  auto const component = std::get<0>(argcomp);
+  auto const argimp = scheme_arg_float_vector_or_error(
+    s7, s7_cadr(args), 2, "radians");
+  if (argimp.index() == 1)
+    return std::get<1>(argimp).pointer;
+  auto const radians = std::get<0>(argimp).pointer;
+  const_cast<UPrimitiveComponent*>(component)->SetPhysicsAngularVelocityInRadians(
+    ue_vector_from_s7(radians));
+  return s7_t(s7);
+}
+
 static auto const name_ue_primitive_component_set_simulate_physics
                     = "ue-primitive-component-set-simulate-physics";
 static auto            ue_primitive_component_set_simulate_physics(
@@ -1461,6 +1481,12 @@ auto bootAboaUe() -> AboaUeMutant {
     3, 0, false, function_help_string(
     name_ue_primitive_component_set_material,
       " component index material").c_str());
+  s7_define_function(s7session,
+    name_ue_primitive_component_set_physics_angular_velocity_in_radians,
+         ue_primitive_component_set_physics_angular_velocity_in_radians,
+    2, 0, false, function_help_string(
+    name_ue_primitive_component_set_physics_angular_velocity_in_radians,
+      " component radians").c_str());
   s7_define_function(s7session,
     name_ue_primitive_component_set_simulate_physics,
          ue_primitive_component_set_simulate_physics,
