@@ -6,6 +6,7 @@
 
 #include "aboa-ue.h"
 
+#include "AboaActorComponent.h"
 #include "aboa-ue-helper.h"
 #include "any-cast-ue.h"
 
@@ -1309,9 +1310,11 @@ static auto            ue_world_current_spawn_actor(
     return std::get<1>(argrot).pointer;
   auto const location = ue_vector_from_s7( std::get<0>(argloc).pointer);
   auto const rotation = ue_rotator_from_s7(std::get<0>(argrot).pointer);
-  return s7_make_c_pointer(s7,
-    const_cast<UWorld*>(world)->SpawnActor(
-      const_cast<UClass*>(uclass), &location, &rotation));
+  auto actor = const_cast<UWorld*>(world)->SpawnActor(
+               const_cast<UClass*>(uclass), &location, &rotation);
+  auto acomp = actor->FindComponentByClass<UAboaActorComponent>();
+  return s7_cons(s7, s7_make_c_pointer(s7, actor),
+                     s7_make_c_pointer(s7, acomp));
 }
 
 static auto function_help_string(
