@@ -1317,6 +1317,44 @@ static auto            ue_world_current_spawn_actor(
                      s7_make_c_pointer(s7, acomp));
 }
 
+static auto const name_ue_world_ray_hit
+                    = "ue-world-ray-hit";
+static auto            ue_world_ray_hit(
+  s7_scheme * s7, s7_pointer args
+) -> s7_pointer {
+  auto const arguobj = scheme_arg_typed_or_error<UObject>(
+    s7, s7_car(args), 1, "uobject");
+  if (arguobj.index() == 1)
+    return std::get<1>(arguobj).pointer;
+  auto const uobject = std::get<0>(arguobj);
+  auto const argstart = scheme_arg_float_vector_or_error(
+    s7, s7_cadr(args), 2, "start");
+  if (argstart.index() == 1)
+    return std::get<1>(argstart).pointer;
+  auto const start = std::get<0>(argstart).pointer;
+  auto const argend = scheme_arg_float_vector_or_error(
+    s7, s7_caddr(args), 3, "end");
+  if (argend.index() == 1)
+    return std::get<1>(argend).pointer;
+  auto const end = std::get<0>(argend).pointer;
+  FHitResult res;
+  bool hit = UKismetSystemLibrary::LineTraceSingle(
+    uobject,
+    ue_vector_from_s7(start),
+    ue_vector_from_s7(end),
+    ETraceTypeQuery::TraceTypeQuery1, // in EngineTypes.h, Visibility?
+    false,              // bTraceComplex
+    TArray<AActor*>(),  // ActorsToIgnore
+    EDrawDebugTrace::None,
+    res, true); // bIgnoreSelf
+  return hit
+    ? s7_list(            s7, 3,
+        s7_make_c_pointer(s7, res.HitObjectHandle.FetchActor()),
+        s7_make_c_pointer(s7, res.Component.Get()),
+        s7_make_real(     s7, res.Distance))
+    : s7_f(               s7);
+}
+
 static auto function_help_string(
   char const * const name,
   char const * const args
@@ -1550,6 +1588,12 @@ auto bootAboaUe() -> AboaUeMutant {
     3, 0, false, function_help_string(
     name_ue_world_current_spawn_actor,
       " class location rotation").c_str());
+  s7_define_function(s7session,
+    name_ue_world_ray_hit,
+         ue_world_ray_hit,
+    3, 0, false, function_help_string(
+    name_ue_world_ray_hit,
+      " uobject start end").c_str());
 
   FString const scmPath = PluginSubpath(
     ANSI_TO_TCHAR("AboaUE"),
