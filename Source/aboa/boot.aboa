@@ -40,6 +40,12 @@
 
   (= (aboaobjsym obj) (string->symbol (object->string obj)))
 
+  (= (aboaue-objenv uobject)
+    ((aboaue-registry-objenv-ref) (aboaobjsym uobject)))
+
+  (= (aboaue-objenv-muta! uobject val)
+    (=> ((aboaue-registry-objenv-ref) (aboaobjsym uobject)) val))
+
   (=  aboaue-registry (aboaht
         (cons 'objenv (aboaht))
         (cons 'pubsub (aboaht
