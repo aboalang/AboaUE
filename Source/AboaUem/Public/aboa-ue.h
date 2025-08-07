@@ -26,7 +26,8 @@ struct AboaUeCode {
 };
 
 enum struct AboaUeDataType {
-  Nothing, Bool, Float, MapNameUptr, String,
+  Nothing,
+  ActorRef, Bool, Float, MapNameUptr, String,
   UobjectPtr, UobjectRef, Vector, VectorArray
 };
 
@@ -77,6 +78,9 @@ auto ABOAUEM_API
 makeAboaUeDataDict(
   std::initializer_list<AboaUeDataArg> const &
 ) -> AboaUeDataDict;
+
+auto ABOAUEM_API
+makeAboaUeDataActorRef(AActor const &) -> AboaUeDataRef;
 
 auto ABOAUEM_API
 makeAboaUeDataFloat(float const &) -> AboaUeDataRef;

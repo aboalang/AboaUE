@@ -8,6 +8,7 @@
 
 #include <any>
 
+auto ueActorPtrFromAny(       std::any const &) -> AActor          const *;
 auto ueFloatPtrFromAny(       std::any const &) -> float           const *;
 auto ueStringPtrFromAny(      std::any const &) -> FString         const *;
 auto ueMapNameUptrFromAny(    std::any const &) -> TMap<FName,TObjectPtr<UObject>> const *;

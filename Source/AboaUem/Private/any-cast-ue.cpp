@@ -23,6 +23,11 @@ template <class T> auto ptrFromAny(
   return pp ? *pp : nullptr;
 }
 
+auto ueActorPtrFromAny(
+    std::any const & a) -> AActor const * {
+  return ptrFromAny<AActor>(a);
+}
+
 auto ueFloatPtrFromAny(
     std::any const & a) -> float const * {
   return ptrFromAny<float>(a);

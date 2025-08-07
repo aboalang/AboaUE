@@ -1664,6 +1664,15 @@ auto callAboaUeCode(
     auto & ref = arg.second;
     s7_pointer s7value = s7_nil(mutant.s7session);
     switch (ref.type) {
+      case AboaUeDataType::ActorRef : {
+        auto op = ueActorPtrFromAny(ref.any);
+        if (!op) UE_LOG(LogAlkScheme, Error,
+          TEXT("runAboaUeCode(...) arg type is not a ActorRef"))
+        else
+          s7value = s7_make_c_pointer(
+            mutant.s7session, const_cast<AActor *>(op));
+        break;
+      }
       case AboaUeDataType::Bool : {
         // TODO: ### IMPLEMENT TYPE
         break;
@@ -1761,6 +1770,10 @@ auto makeAboaUeDataDict(
   return dict;
 }
 
+auto makeAboaUeDataActorRef(AActor const & data) -> AboaUeDataRef {
+  return {&data, AboaUeDataType::ActorRef};
+}
+
 auto makeAboaUeDataFloat(float const & data) -> AboaUeDataRef {
   return {&data, AboaUeDataType::Float};
 }
@@ -1775,16 +1788,16 @@ auto makeAboaUeDataString(FString const & data) -> AboaUeDataRef {
   return {&data, AboaUeDataType::String};
 }
 
-auto makeAboaUeDataVector(FVector const & data) -> AboaUeDataRef {
-  return {&data, AboaUeDataType::Vector};
-}
-
 auto makeAboaUeDataUobjectPtr(UObject const * data) -> AboaUeDataRef {
   return {data, AboaUeDataType::UobjectPtr};
 }
 
 auto makeAboaUeDataUobjectRef(UObject const & data) -> AboaUeDataRef {
   return {&data, AboaUeDataType::UobjectRef};
+}
+
+auto makeAboaUeDataVector(FVector const & data) -> AboaUeDataRef {
+  return {&data, AboaUeDataType::Vector};
 }
 
 auto makeAboaUeDataVectorArray(TArray<FVector> const & data) -> AboaUeDataRef {
