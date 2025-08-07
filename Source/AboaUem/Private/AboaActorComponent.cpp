@@ -40,7 +40,7 @@ void UAboaActorComponent::InitializeComponent() {
     pluginSourcePath(AboaDirPlugin, AboaDirSource, AboaFilename),
     AboaNamespace + "-augment-init",
     makeAboaUeDataDict({
-      {"uobject", makeAboaUeDataUobjectRef(*this)}}),
+      {"actor", makeAboaUeDataActorRef(*GetOwner())}}),
     true); // forceReload TODO: ### UNTIL AUTO-RELOAD IS IMPLEMENTED
   //PrintStringToScreen(dumpAboaUeDataDict(results));
     // ^ TODO: ### TRACING
@@ -54,7 +54,7 @@ void UAboaActorComponent::BeginPlay() {
   auto results = callLoadedAboaUeCode(
     AboaNamespace + "-augment-begin-play",
     makeAboaUeDataDict({
-      {"uobject", makeAboaUeDataUobjectRef(*this)}}));
+      {"actor", makeAboaUeDataActorRef(*GetOwner())}}));
 }
 
 // virtual
@@ -65,7 +65,7 @@ void UAboaActorComponent::EndPlay(
   auto results = callLoadedAboaUeCode(
     AboaNamespace + "-augment-end-play",
     makeAboaUeDataDict({
-      {"uobject", makeAboaUeDataUobjectRef(*this)}}));
+      {"actor", makeAboaUeDataActorRef(*GetOwner())}}));
 }
 
 // virtual
@@ -78,8 +78,8 @@ void UAboaActorComponent::TickComponent(
   auto results = callLoadedAboaUeCode(
     AboaNamespace + "-augment-tick",
     makeAboaUeDataDict({
-      {"uobject", makeAboaUeDataUobjectRef(*this)},
-      {"delta",   makeAboaUeDataFloat(DeltaTime)}}));
+      {"actor", makeAboaUeDataActorRef(*GetOwner())},
+      {"delta", makeAboaUeDataFloat(DeltaTime)}}));
 }
 
 // virtual
@@ -88,5 +88,5 @@ void UAboaActorComponent::UninitializeComponent() {
   auto results = callLoadedAboaUeCode(
     AboaNamespace + "-augment-uninit",
     makeAboaUeDataDict({
-      {"uobject", makeAboaUeDataUobjectRef(*this)}}));
+      {"actor", makeAboaUeDataActorRef(*GetOwner())}}));
 }
