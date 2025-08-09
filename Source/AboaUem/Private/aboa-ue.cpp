@@ -473,10 +473,12 @@ ue_actor_set_location(s7_scheme * s7, s7_pointer args) -> s7_pointer {
   ) ? s7_t(s7) : s7_f(s7);
 }
 
-static auto const name_ue_actor_get_root = "ue-actor-get-root";
-static auto
-ue_actor_get_root(s7_scheme * s7, s7_pointer args) -> s7_pointer {
-  auto const argchar = scheme_arg_typed_or_error<ACharacter>(
+static auto const name_ue_actor_get_root
+                    = "ue-actor-get-root";
+static auto            ue_actor_get_root(
+  s7_scheme * s7, s7_pointer args
+) -> s7_pointer {
+  auto const argchar = scheme_arg_typed_or_error<AActor>(
     s7, s7_car(args), 1, "actor");
   if (argchar.index() == 1)
     return std::get<1>(argchar).pointer;
@@ -1393,8 +1395,11 @@ auto bootAboaUe() -> AboaUeMutant {
     name_ue_actor_set_location, ue_actor_set_location, 2, 0, false,
     function_help_string(  name_ue_actor_set_location, " actor location").c_str());
   s7_define_function(s7session,
-    name_ue_actor_get_root,     ue_actor_get_root, 1, 0, false,
-    function_help_string(  name_ue_actor_get_root, " actor").c_str());
+    name_ue_actor_get_root,
+         ue_actor_get_root,
+    1, 0, false, function_help_string(
+    name_ue_actor_get_root,
+      " actor").c_str());
   s7_define_function(s7session,
     name_ue_actor_get_scale,
          ue_actor_get_scale,
