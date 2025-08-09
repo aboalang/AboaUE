@@ -436,6 +436,21 @@ ue_actor_detach_from_actor(s7_scheme * s7, s7_pointer args) -> s7_pointer {
   return s7_t(s7);
 }
 
+static auto const name_ue_actor_get_attach_parent_actor
+                    = "ue-actor-get-attach-parent-actor";
+static auto            ue_actor_get_attach_parent_actor(
+  s7_scheme * s7, s7_pointer args
+) -> s7_pointer {
+  auto const argchar = scheme_arg_typed_or_error<AActor>(
+    s7, s7_car(args), 1, "actor");
+  if (argchar.index() == 1)
+    return std::get<1>(argchar).pointer;
+  auto const actor = std::get<0>(argchar);
+  if (!actor)
+    return s7_f(s7); // !!! scheme_arg_typed_or_error already checks for null
+  return s7_make_c_pointer(s7, actor->GetAttachParentActor());
+}
+
 static auto const name_ue_actor_get_location = "ue-actor-get-location";
 static auto
 ue_actor_get_location(s7_scheme * s7, s7_pointer args) -> s7_pointer {
@@ -1403,6 +1418,12 @@ auto bootAboaUe() -> AboaUeMutant {
     2, 0, false, function_help_string(
     name_ue_actor_detach_from_actor,
       " actor rules").c_str());
+  s7_define_function(s7session,
+    name_ue_actor_get_attach_parent_actor,
+         ue_actor_get_attach_parent_actor,
+    1, 0, false, function_help_string(
+    name_ue_actor_get_attach_parent_actor,
+      " actor").c_str());
   s7_define_function(s7session,
     name_ue_actor_get_location, ue_actor_get_location, 1, 0, false,
     function_help_string(  name_ue_actor_get_location,  " actor").c_str());
