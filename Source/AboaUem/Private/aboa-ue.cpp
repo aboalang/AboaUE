@@ -467,7 +467,7 @@ static auto            ue_actor_get_attached_actors(
   actor->GetAttachedActors(actors);
   auto res = s7_nil(s7);
   for (auto & act : actors)
-    s7_append(s7, res, s7_list(s7, 1, s7_make_c_pointer(s7, act)));
+    res = s7_append(s7, res, s7_list(s7, 1, s7_make_c_pointer(s7, act)));
   return res;
 }
 
