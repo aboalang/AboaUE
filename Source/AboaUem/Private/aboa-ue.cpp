@@ -1286,6 +1286,20 @@ static auto            umg_user_widget_get_root_widget(
     : s7_f(s7); // !!! scheme_arg_typed_or_error already checks for null
 }
 
+static auto const name_ue_vector_angles_euler
+                    = "ue-vector-angles-euler";
+static auto            ue_vector_angles_euler(
+  s7_scheme * s7, s7_pointer args
+) -> s7_pointer {
+  auto const argvec = scheme_arg_float_vector_or_error(
+    s7, s7_car(args), 1, "vector");
+  if (argvec.index() == 1)
+    return std::get<1>(argvec).pointer;
+  auto const vector = std::get<0>(argvec).pointer;
+  return scheme_ue_vector(s7,
+    ue_vector_from_s7(vector).ToOrientationRotator().Euler());
+}
+
 static auto const name_ue_vector_rotate_euler
                     = "ue-vector-rotate-euler";
 static auto            ue_vector_rotate_euler(
@@ -1637,6 +1651,12 @@ auto bootAboaUe() -> AboaUeMutant {
     1, 0, false, function_help_string(
     name_ue_uobject_get_display_name,
       " uobject").c_str());
+  s7_define_function(s7session,
+    name_ue_vector_angles_euler,
+         ue_vector_angles_euler,
+    1, 0, false, function_help_string(
+    name_ue_vector_angles_euler,
+      " vector").c_str());
   s7_define_function(s7session,
     name_ue_vector_rotate_euler,
          ue_vector_rotate_euler,
