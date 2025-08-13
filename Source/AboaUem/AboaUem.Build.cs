@@ -17,7 +17,7 @@ public class AboaUem : ModuleRules {
       "UMG"
     });
     RuntimeDependencies.Add(
-      PluginDirectory + "/Source/aboa/boot.aboa");
+      PluginDirectory + "/Source/aboa/*.aboa");
     ShadowVariableWarningLevel = WarningLevel.Warning;
       // ^ !!! needed for aboa-s7.c when compiled for Android in Xcode on macOS:
     bEnableUndefinedIdentifierWarnings = false;
