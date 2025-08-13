@@ -668,6 +668,25 @@ static auto            ue_actor_is_attached_to(
     ? s7_t(s7) : s7_f(s7);
 }
 
+static auto const name_ue_actor_tags =
+                      "ue-actor-tags";
+static auto            ue_actor_tags(
+  s7_scheme * s7, s7_pointer args
+) -> s7_pointer {
+  auto const argactor = scheme_arg_typed_or_error<ACharacter>(
+    s7, s7_car(args), 1, "actor");
+  if (argactor.index() == 1)
+    return std::get<1>(argactor).pointer;
+  auto const actor = std::get<0>(argactor);
+  if (!actor)
+    return s7_f(s7); // !!! scheme_arg_typed_or_error already checks for null
+  auto res = s7_nil(s7);
+  for (auto const & uefname : actor->Tags)
+    res = s7_append(s7, res, s7_list(s7, 1,
+      s7_make_string(s7, TCHAR_TO_ANSI(*uefname.ToString()))));
+  return res;
+}
+
 static auto const name_ue_actor_component_get_owner = "ue-actor-component-get-owner";
 static auto
 ue_actor_component_get_owner(s7_scheme * s7, s7_pointer args) -> s7_pointer {
@@ -1524,6 +1543,12 @@ auto bootAboaUe() -> AboaUeMutant {
     2, 0, false, function_help_string(
     name_ue_actor_is_attached_to,
       " actor other").c_str());
+  s7_define_function(s7session,
+    name_ue_actor_tags,
+         ue_actor_tags,
+    1, 0, false, function_help_string(
+    name_ue_actor_tags,
+      " actor").c_str());
   s7_define_function(s7session,
     name_ue_actor_component_get_owner,
          ue_actor_component_get_owner,
