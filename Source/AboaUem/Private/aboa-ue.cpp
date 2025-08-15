@@ -15,6 +15,7 @@
 #include "Blueprint/GameViewportSubsystem.h"
 #include "Blueprint/UserWidget.h"
 #include "Components/ActorComponent.h"
+#include "Components/AudioComponent.h"
 #include "Components/Image.h"
 #include "Components/InputComponent.h"
 #include "Components/PanelWidget.h"
@@ -468,6 +469,26 @@ static auto            ue_actor_get_attached_actors(
   auto res = s7_nil(s7);
   for (auto & act : actors)
     res = s7_append(s7, res, s7_list(s7, 1, s7_make_c_pointer(s7, act)));
+  return res;
+}
+
+static auto const name_ue_actor_get_audio_components
+                    = "ue-actor-get-audio-components";
+static auto            ue_actor_get_audio_components(
+  s7_scheme * s7, s7_pointer args
+) -> s7_pointer {
+  auto const argactor = scheme_arg_typed_or_error<AActor>(
+    s7, s7_car(args), 1, "actor");
+  if (argactor.index() == 1)
+    return std::get<1>(argactor).pointer;
+  auto const actor = std::get<0>(argactor);
+  if (!actor)
+    return s7_f(s7); // !!! scheme_arg_typed_or_error already checks for null
+  TArray<UAudioComponent*> audios;
+  actor->GetComponents(audios);
+  auto res = s7_nil(s7);
+  for (auto & audio : audios)
+    res = s7_append(s7, res, s7_list(s7, 1, s7_make_c_pointer(s7, audio)));
   return res;
 }
 
@@ -1464,6 +1485,12 @@ auto bootAboaUe() -> AboaUeMutant {
     1, 0, false, function_help_string(
     name_ue_actor_get_attached_actors,
       " actor").c_str());
+  s7_define_function(s7session,
+    name_ue_actor_get_audio_components,
+         ue_actor_get_audio_components,
+    1, 0, false, function_help_string(
+    name_ue_actor_get_audio_components,
+    " actor").c_str());
   s7_define_function(s7session,
     name_ue_actor_get_location, ue_actor_get_location, 1, 0, false,
     function_help_string(  name_ue_actor_get_location,  " actor").c_str());
