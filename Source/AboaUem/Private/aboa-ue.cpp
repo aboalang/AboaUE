@@ -702,6 +702,26 @@ ue_actor_component_get_owner(s7_scheme * s7, s7_pointer args) -> s7_pointer {
   return s7_make_c_pointer(s7, comp->GetOwner());
 }
 
+static auto const name_ue_actor_component_has_tag
+                    = "ue-actor-component-has-tag";
+static auto            ue_actor_component_has_tag(
+  s7_scheme * s7, s7_pointer args
+) -> s7_pointer {
+  auto const argcomp = scheme_arg_typed_or_error<UActorComponent>(
+    s7, s7_car(args), 1, "component");
+  if (argcomp.index() == 1)
+    return std::get<1>(argcomp).pointer;
+  auto const comp = std::get<0>(argcomp);
+  if (!comp)
+    return s7_f(s7); // !!! scheme_arg_typed_or_error already checks for null
+  auto const argtag = scheme_arg_string_or_error(
+    s7, s7_cadr(args), 2, "tag");
+  if (argtag.index() == 1)
+    return std::get<1>(argtag).pointer;
+  return comp->ComponentTags.Find(std::get<0>(argtag)) == INDEX_NONE
+    ? s7_f(s7) : s7_t(s7);
+}
+
 static auto const name_ue_character_get_mesh = "ue-character-get-mesh";
 static auto
 ue_character_get_mesh(s7_scheme * s7, s7_pointer args) -> s7_pointer {
@@ -1557,6 +1577,12 @@ auto bootAboaUe() -> AboaUeMutant {
     1, 0, false, function_help_string(
     name_ue_actor_component_get_owner,
       " component").c_str());
+  s7_define_function(s7session,
+    name_ue_actor_component_has_tag,
+         ue_actor_component_has_tag,
+    2, 0, false, function_help_string(
+    name_ue_actor_component_has_tag,
+      " component tag").c_str());
   s7_define_function(s7session,
     name_ue_character_get_mesh,
          ue_character_get_mesh,
