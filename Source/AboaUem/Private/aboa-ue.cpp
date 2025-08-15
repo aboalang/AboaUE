@@ -722,6 +722,26 @@ static auto            ue_actor_component_has_tag(
     ? s7_f(s7) : s7_t(s7);
 }
 
+static auto const name_ue_audio_component_play
+                    = "ue-audio-component-play";
+static auto            ue_audio_component_play(
+  s7_scheme * s7, s7_pointer args
+) -> s7_pointer {
+  auto const argaudio = scheme_arg_typed_or_error<UAudioComponent>(
+    s7, s7_car(args), 1, "component");
+  if (argaudio.index() == 1)
+    return std::get<1>(argaudio).pointer;
+  auto audio = std::get<0>(argaudio);
+  if (!audio)
+    return s7_f(s7); // !!! scheme_arg_typed_or_error already checks for null
+  auto const argstart = scheme_arg_real_or_error(
+    s7, s7_cadr(args), 2, "start");
+  if (argstart.index() == 1)
+    return std::get<1>(argstart).pointer;
+  const_cast<UAudioComponent*>(audio)->Play(std::get<0>(argstart));
+  return s7_t(s7);
+}
+
 static auto const name_ue_character_get_mesh = "ue-character-get-mesh";
 static auto
 ue_character_get_mesh(s7_scheme * s7, s7_pointer args) -> s7_pointer {
@@ -1583,6 +1603,12 @@ auto bootAboaUe() -> AboaUeMutant {
     2, 0, false, function_help_string(
     name_ue_actor_component_has_tag,
       " component tag").c_str());
+  s7_define_function(s7session,
+    name_ue_audio_component_play,
+         ue_audio_component_play,
+    2, 0, false, function_help_string(
+    name_ue_audio_component_play,
+      " component start").c_str());
   s7_define_function(s7session,
     name_ue_character_get_mesh,
          ue_character_get_mesh,
